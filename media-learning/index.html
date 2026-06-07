@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>매체 퀴즈 - 어떤 매체일까요? 🎉</title>
+  <meta name="description" content="아이들을 위한 매체 학습 퀴즈! 종이 매체와 화면 매체의 예시를 맞혀보세요." />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --paper-color: #ff9800;
+      --screen-color: #3f51b5;
+      --correct: #4caf50;
+      --wrong: #f44336;
+      --shadow: 0 8px 32px rgba(0,0,0,0.13);
+      --radius: 24px;
+      --text-dark: #2d2d2d;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* iPad 터치 최적화: 딜레이 제거, 텍스트 선택 방지 */
+    button {
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      user-select: none;
+    }
+    img { -webkit-user-drag: none; user-select: none; }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: linear-gradient(135deg, #fff9e6 0%, #fce4ec 45%, #e3f2fd 100%);
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+    }
+
+    /* ─── 공통 ─── */
+    .screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 960px;
+      padding: 24px 24px 32px;
+      animation: fadeIn 0.45s ease;
+    }
+    .screen.active { display: flex; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes bounce {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-14px); }
+    }
+    @keyframes popIn {
+      from { transform: scale(0.3) rotate(-15deg); }
+      to   { transform: scale(1) rotate(0deg); }
+    }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%      { transform: translateX(-9px); }
+      40%      { transform: translateX(9px); }
+      60%      { transform: translateX(-6px); }
+      80%      { transform: translateX(6px); }
+    }
+
+    /* ══════════════════════════════
+       🌟 시작 화면
+    ══════════════════════════════ */
+    #start-screen { gap: 22px; text-align: center; }
+
+    .start-logo {
+      width: 150px; height: 150px;
+      object-fit: contain;
+      animation: bounce 1.8s infinite;
+      filter: drop-shadow(0 6px 14px rgba(0,0,0,0.18));
+    }
+    .start-title {
+      font-size: clamp(32px, 5vw, 52px);
+      font-weight: 900;
+      background: linear-gradient(135deg, #ff6b35, #f7931e, #5c6bc0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.2;
+    }
+    .start-subtitle {
+      font-size: clamp(17px, 2.5vw, 22px);
+      color: #666;
+      font-weight: 700;
+    }
+
+    /* 카테고리 소개 카드 */
+    .cat-intro {
+      display: flex;
+      gap: 16px;
+      width: 100%;
+      flex-wrap: wrap;
+    }
+    .cat-intro-card {
+      flex: 1;
+      min-width: 220px;
+      background: white;
+      border-radius: 22px;
+      padding: 28px 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      transition: transform 0.2s;
+    }
+    .cat-intro-card:active { transform: scale(0.97); }
+    .cat-intro-card.paper { border-top: 7px solid var(--paper-color); }
+    .cat-intro-card.screen { border-top: 7px solid var(--screen-color); }
+    .cat-intro-img {
+      width: 120px; height: 120px;
+      object-fit: contain;
+    }
+    .cat-intro-label {
+      font-size: clamp(15px, 2vw, 18px); font-weight: 900;
+      color: var(--text-dark); text-align: center;
+    }
+    .cat-intro-examples {
+      font-size: clamp(13px, 1.5vw, 15px); color: #999;
+      text-align: center; line-height: 1.8;
+    }
+
+    .start-info {
+      background: rgba(255,255,255,0.8);
+      border-radius: 16px;
+      padding: 14px 28px;
+      font-size: clamp(15px, 2vw, 18px);
+      color: #555;
+      font-weight: 700;
+      backdrop-filter: blur(8px);
+    }
+
+    .btn-start {
+      background: linear-gradient(135deg, #ff6b35, #f7931e);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 22px 80px;
+      font-size: clamp(22px, 3vw, 28px);
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 6px 22px rgba(255,107,53,0.45);
+      transition: transform 0.15s, box-shadow 0.15s;
+      font-family: inherit;
+      letter-spacing: 2px;
+      min-height: 72px;
+    }
+    .btn-start:active {
+      transform: scale(0.96);
+      box-shadow: 0 3px 10px rgba(255,107,53,0.35);
+    }
+
+    /* ══════════════════════════════
+       ❓ 퀴즈 화면
+    ══════════════════════════════ */
+    #quiz-screen { gap: 16px; }
+
+    /* 가로 모드: 배너 + 보기 2컬럼 */
+    .quiz-body {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .progress-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      gap: 12px;
+    }
+    .progress-label { font-size: clamp(15px, 2vw, 18px); font-weight: 700; color: #999; white-space: nowrap; }
+    .progress-bar-wrap {
+      flex: 1;
+      background: rgba(255,255,255,0.6);
+      border-radius: 50px;
+      height: 16px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.09);
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ff6b35, #f7931e);
+      border-radius: 50px;
+      transition: width 0.55s cubic-bezier(.4,1.3,.6,1);
+    }
+
+    /* 카테고리 배너 */
+    .category-banner {
+      width: 100%;
+      border-radius: 22px;
+      padding: 28px 28px 22px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      box-shadow: var(--shadow);
+    }
+    .category-banner.paper {
+      background: linear-gradient(135deg, #fff8e1, #ffe0b2);
+      border: 3px solid #ffc107;
+    }
+    .category-banner.screen {
+      background: linear-gradient(135deg, #e8eaf6, #c5cae9);
+      border: 3px solid #5c6bc0;
+    }
+    .banner-tag {
+      font-size: clamp(13px, 1.5vw, 15px);
+      font-weight: 900;
+      letter-spacing: 2px;
+      padding: 6px 18px;
+      border-radius: 20px;
+    }
+    .paper .banner-tag  { background: #ff9800; color: white; }
+    .screen .banner-tag { background: #3f51b5; color: white; }
+
+    /* 배너 이미지 */
+    .banner-cat-img {
+      width: 160px; height: 160px;
+      object-fit: contain;
+      filter: drop-shadow(0 6px 16px rgba(0,0,0,0.18));
+    }
+
+    .banner-category {
+      font-size: clamp(22px, 3.5vw, 32px);
+      font-weight: 900;
+      text-align: center;
+    }
+    .paper .banner-category  { color: #e65100; }
+    .screen .banner-category { color: #283593; }
+    .banner-question {
+      font-size: clamp(17px, 2.5vw, 22px);
+      font-weight: 900;
+      color: #555;
+      text-align: center;
+      margin-top: 2px;
+    }
+
+    /* 보기 카드들 */
+    .choices {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 100%;
+    }
+
+    .choice-btn {
+      width: 100%;
+      background: white;
+      border: 3px solid #e0e0e0;
+      border-radius: 20px;
+      padding: 16px 22px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 900;
+      font-size: clamp(18px, 2.8vw, 24px);
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      transition: transform 0.12s, box-shadow 0.12s, border-color 0.12s, background 0.12s;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.07);
+      text-align: left;
+      color: var(--text-dark);
+      min-height: 80px;   /* iPad 터치 타겟 최소 크기 */
+      -webkit-tap-highlight-color: transparent;
+    }
+    .choice-btn:active:not(:disabled) {
+      transform: scale(0.97);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .choice-btn:disabled { cursor: not-allowed; opacity: 0.85; }
+
+    .choice-num {
+      width: 46px; height: 46px;
+      border-radius: 50%;
+      background: #f0f0f0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; font-weight: 900;
+      color: #888;
+      flex-shrink: 0;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    /* 선택지 이미지 */
+    .choice-img {
+      width: 110px; height: 110px;
+      object-fit: contain;
+      flex-shrink: 0;
+      filter: drop-shadow(0 3px 8px rgba(0,0,0,0.12));
+    }
+
+    .choice-label { flex: 1; line-height: 1.3; }
+
+    /* 정답/오답 상태 */
+    .choice-btn.is-correct {
+      border-color: #4caf50 !important;
+      background: linear-gradient(135deg, #e8f5e9, #c8e6c9) !important;
+      box-shadow: 0 0 0 4px rgba(76,175,80,0.25) !important;
+    }
+    .choice-btn.is-correct .choice-num {
+      background: #4caf50; color: white;
+    }
+    .choice-btn.is-wrong {
+      border-color: #f44336 !important;
+      background: linear-gradient(135deg, #ffebee, #ffcdd2) !important;
+      animation: shake 0.4s ease;
+    }
+    .choice-btn.is-wrong .choice-num {
+      background: #f44336; color: white;
+    }
+
+    /* ══════════════════════════════
+       정답/오답 오버레이
+    ══════════════════════════════ */
+    .feedback-overlay {
+      position: fixed; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 100; opacity: 0; pointer-events: none;
+      transition: opacity 0.25s;
+      gap: 12px;
+    }
+    .feedback-overlay.show { opacity: 1; pointer-events: all; }
+    .feedback-overlay.correct { background: rgba(56,175,80,0.93); }
+    .feedback-overlay.wrong   { background: rgba(230,60,50,0.91); }
+
+    .feedback-icon {
+      font-size: 100px;
+      animation: popIn 0.4s cubic-bezier(.175,.885,.32,1.275);
+    }
+    .feedback-img {
+      width: 200px; height: 200px;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 24px rgba(0,0,0,0.3));
+      animation: popIn 0.4s cubic-bezier(.175,.885,.32,1.275);
+    }
+    .feedback-msg {
+      font-size: clamp(30px, 5vw, 50px);
+      font-weight: 900; color: white;
+      text-align: center; padding: 0 24px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    .feedback-correct-item {
+      background: rgba(255,255,255,0.2);
+      border-radius: 16px;
+      padding: 12px 32px;
+      font-size: clamp(20px, 3vw, 28px);
+      font-weight: 900;
+      color: white;
+      text-align: center;
+    }
+
+    /* ══════════════════════════════
+       🏆 결과 화면
+    ══════════════════════════════ */
+    #result-screen { gap: 20px; text-align: center; }
+
+    .result-trophy { font-size: 88px; animation: bounce 1.5s infinite; }
+    .result-title {
+      font-size: clamp(26px, 5.5vw, 38px);
+      font-weight: 900; color: var(--text-dark);
+    }
+
+    .score-display {
+      background: white; border-radius: 24px;
+      padding: 26px 40px; box-shadow: var(--shadow);
+      width: 100%;
+    }
+    .score-number {
+      font-size: clamp(58px, 13vw, 82px);
+      font-weight: 900;
+      background: linear-gradient(135deg, #ff6b35, #f7931e);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text; line-height: 1;
+    }
+    .score-total { font-size: 20px; color: #aaa; margin-top: 4px; }
+    .score-stars { font-size: 36px; margin-top: 8px; }
+
+    .result-message {
+      font-size: 19px; font-weight: 700;
+      color: #555; line-height: 1.7;
+    }
+
+    .result-summary {
+      width: 100%; background: white;
+      border-radius: 20px; padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    .summary-title { font-size: 15px; font-weight: 900; color: #aaa; margin-bottom: 14px; }
+    .summary-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 0; border-bottom: 1px solid #f0f0f0;
+      font-size: 15px; font-weight: 700;
+    }
+    .summary-row:last-child { border-bottom: none; }
+    .s-img {
+      width: 52px; height: 52px;
+      object-fit: contain;
+      flex-shrink: 0;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    }
+    .s-name  { flex: 1; color: var(--text-dark); }
+    .s-cat   { font-size: 12px; color: #aaa; font-weight: 700; }
+    .s-badge {
+      font-size: 13px; padding: 4px 12px;
+      border-radius: 20px; font-weight: 900;
+      flex-shrink: 0;
+    }
+    .badge-ok  { background: #e8f5e9; color: #2e7d32; }
+    .badge-err { background: #ffebee; color: #c62828; }
+
+    .btn-retry {
+      background: linear-gradient(135deg, #3f51b5, #1a237e);
+      color: white; border: none; border-radius: 50px;
+      padding: 22px 72px; font-size: clamp(20px, 2.5vw, 26px);
+      font-weight: 900; cursor: pointer;
+      box-shadow: 0 6px 22px rgba(63,81,181,0.4);
+      transition: transform 0.15s, box-shadow 0.15s;
+      font-family: inherit;
+      min-height: 72px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-retry:active {
+      transform: scale(0.96);
+      box-shadow: 0 3px 10px rgba(63,81,181,0.3);
+    }
+
+    /* ─── 컨페티 ─── */
+    .confetti-piece {
+      position: fixed; top: -20px;
+      border-radius: 2px;
+      animation: confettiFall linear forwards;
+      z-index: 200; pointer-events: none;
+    }
+    @keyframes confettiFall {
+      to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
+
+    /* ─── iPad 가로(landscape) 모드 최적화 ─── */
+    @media (orientation: landscape) and (min-width: 768px) {
+      body { align-items: flex-start; padding-top: 12px; }
+      .screen { padding: 16px 24px 20px; }
+      #quiz-screen { gap: 12px; }
+
+      /* 배너 + 보기를 좌우 2컬럼으로 */
+      .quiz-body {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 20px;
+      }
+      .category-banner {
+        width: 340px;
+        flex-shrink: 0;
+        min-height: 360px;
+        justify-content: center;
+      }
+      .banner-cat-img { width: 130px; height: 130px; }
+      .choices { flex: 1; }
+      .choice-btn { min-height: 90px; }
+      .choice-img { width: 90px; height: 90px; }
+    }
+
+    /* ─── 작은 화면 ─── */
+    @media (max-width: 480px) {
+      .cat-intro { flex-direction: column; }
+      .cat-intro-card { min-width: unset; }
+      .choice-img { width: 70px; height: 70px; }
+      .choice-btn { font-size: 16px; min-height: 70px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════
+     🌟 시작 화면
+════════════════════════════════ -->
+<section id="start-screen" class="screen active" role="main">
+  <img src="images/book.png" class="start-logo" alt="책" />
+  <h1 class="start-title">매체 알아맞히기!</h1>
+  <p class="start-subtitle">어떤 매체인지 예시를 골라보세요!</p>
+
+  <div class="cat-intro">
+    <div class="cat-intro-card paper">
+      <img src="images/newspaper.png" class="cat-intro-img" alt="신문" />
+      <div class="cat-intro-label">종이로 만든 매체</div>
+      <div class="cat-intro-examples">책, 신문, 잡지, 만화책<br>동화책, 편지, 사전 …</div>
+    </div>
+    <div class="cat-intro-card screen">
+      <img src="images/tv.png" class="cat-intro-img" alt="TV" />
+      <div class="cat-intro-label">화면과 소리가 나오는 매체</div>
+      <div class="cat-intro-examples">TV, 영화, 라디오, 게임<br>유튜브, 애니메이션 …</div>
+    </div>
+  </div>
+
+  <div class="start-info">📝 총 6문제 · 3개 보기 중에서 골라요!</div>
+
+  <button class="btn-start" id="btn-start" onclick="startQuiz()">
+    🚀 시작하기!
+  </button>
+</section>
+
+<!-- ════════════════════════════════
+     ❓ 퀴즈 화면
+════════════════════════════════ -->
+<section id="quiz-screen" class="screen" role="main" aria-label="퀴즈 화면">
+
+  <div class="progress-row">
+    <div class="progress-label" id="progress-label">1 / 6</div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- 배너 + 보기 (가로모드: 2컬럼) -->
+  <div class="quiz-body" id="quiz-body">
+
+    <!-- 카테고리 배너 -->
+    <div class="category-banner paper" id="category-banner">
+      <div class="banner-tag" id="banner-tag">종이 매체</div>
+      <img src="images/newspaper.png" class="banner-cat-img" id="banner-cat-img" alt="카테고리 이미지" />
+      <div class="banner-category" id="banner-category">종이로 만든 매체</div>
+      <div class="banner-question" id="banner-question">다음 중 <strong>종이로 만든 매체</strong>는 무엇일까요?</div>
+    </div>
+
+    <!-- 3개 보기 -->
+    <div class="choices" id="choices-container"></div>
+
+  </div>
+
+</section>
+
+<!-- ════════════════════════════════
+     🏆 결과 화면
+════════════════════════════════ -->
+<section id="result-screen" class="screen" role="main" aria-label="결과 화면">
+  <div class="result-trophy" id="result-trophy">🏆</div>
+  <h2 class="result-title" id="result-title">퀴즈 완료!</h2>
+
+  <div class="score-display">
+    <div class="score-number" id="score-number">0</div>
+    <div class="score-total">/ 6 문제 정답</div>
+    <div class="score-stars" id="score-stars">⭐⭐⭐</div>
+  </div>
+
+  <p class="result-message" id="result-message">잘했어요!</p>
+
+  <div class="result-summary">
+    <div class="summary-title">📋 문제별 결과</div>
+    <div id="summary-list"></div>
+  </div>
+
+  <button class="btn-retry" id="btn-retry" onclick="restartQuiz()">
+    🔄 다시 도전하기!
+  </button>
+</section>
+
+<!-- ═══ 피드백 오버레이 ═══ -->
+<div class="feedback-overlay" id="feedback-overlay" role="alert" aria-live="assertive">
+  <div class="feedback-icon" id="feedback-icon">🎉</div>
+  <img src="" class="feedback-img" id="feedback-img" alt="정답 이미지" />
+  <div class="feedback-msg" id="feedback-msg">정답!</div>
+  <div class="feedback-correct-item" id="feedback-correct-item"></div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   아이템 데이터 (이미지 경로 포함)
+══════════════════════════════════════════════════════ */
+const PAPER_ITEMS = [
+  { img: 'images/newspaper.png', name: '신문',   desc: '날마다 세상 소식을 종이에 인쇄해요.' },
+  { img: 'images/book.png',      name: '책',     desc: '이야기와 지식이 담긴 종이 묶음이에요.' },
+  { img: 'images/comic.png',     name: '만화책', desc: '그림과 말풍선이 가득한 재미있는 책이에요.' },
+  { img: 'images/magazine.png',  name: '잡지',   desc: '다양한 주제의 기사가 실린 종이 책자예요.' },
+  { img: 'images/storybook.png', name: '동화책', desc: '아이들을 위한 이야기 그림책이에요.' },
+  { img: 'images/dictionary.png',name: '사전',   desc: '모르는 낱말의 뜻을 찾는 두꺼운 책이에요.' },
+  { img: 'images/letter.png',    name: '편지',   desc: '마음을 담아 종이에 적어 보내요.' },
+  { img: 'images/map.png',       name: '지도',   desc: '길과 장소를 종이에 그린 안내판이에요.' },
+];
+
+const SCREEN_ITEMS = [
+  { img: 'images/tv.png',        name: '텔레비전',    desc: '화면으로 영상을 보고 소리도 들어요.' },
+  { img: 'images/movie.png',     name: '영화',        desc: '큰 화면에서 보는 움직이는 이야기예요.' },
+  { img: 'images/radio.png',     name: '라디오',      desc: '소리만으로 음악과 뉴스를 들려줘요.' },
+  { img: 'images/game.png',      name: '비디오 게임', desc: '화면을 보며 버튼을 눌러 즐기는 놀이예요.' },
+  { img: 'images/youtube.png',   name: '유튜브',      desc: '스마트폰으로 영상을 보는 서비스예요.' },
+  { img: 'images/animation.png', name: '애니메이션',  desc: '캐릭터들이 화면에서 움직이며 말해요.' },
+  { img: 'images/news.png',      name: '뉴스 방송',   desc: 'TV로 오늘의 소식을 전해 주는 프로그램이에요.' },
+  { img: 'images/music.png',     name: '음악 방송',   desc: '화면과 소리로 노래를 들려주는 방송이에요.' },
+];
+
+const CATEGORIES = {
+  paper: {
+    label: '종이로 만든 매체',
+    tag:   '종이 매체',
+    img:   'images/newspaper.png',
+    cls:   'paper',
+    items: PAPER_ITEMS,
+  },
+  screen: {
+    label: '화면과 소리가 나오는 매체',
+    tag:   '화면·소리 매체',
+    img:   'images/tv.png',
+    cls:   'screen',
+    items: SCREEN_ITEMS,
+  },
+};
+
+/* ══════════════════════════════════════════════════════
+   게임 상태
+══════════════════════════════════════════════════════ */
+const TOTAL_Q = 6;
+let quizList  = [];
+let curIdx    = 0;
+let score     = 0;
+let results   = [];
+let answering = false;
+
+/* ══════════════════════════════════════════════════════
+   유틸
+══════════════════════════════════════════════════════ */
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function pickRandom(arr, n) { return shuffle(arr).slice(0, n); }
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  el.classList.add('active');
+  el.style.animation = 'none'; el.offsetHeight; el.style.animation = '';
+}
+
+/* ══════════════════════════════════════════════════════
+   문제 생성
+══════════════════════════════════════════════════════ */
+function buildQuizList() {
+  const paperCorrects  = pickRandom(PAPER_ITEMS, 3);
+  const screenCorrects = pickRandom(SCREEN_ITEMS, 3);
+
+  const makeQ = (category, correct) => {
+    const wrongPool = category === 'paper' ? SCREEN_ITEMS : PAPER_ITEMS;
+    const wrongs    = pickRandom(wrongPool, 2);
+    return { category, correct, choices: shuffle([correct, ...wrongs]) };
+  };
+
+  return shuffle([
+    ...paperCorrects.map(item => makeQ('paper', item)),
+    ...screenCorrects.map(item => makeQ('screen', item)),
+  ]);
+}
+
+/* ══════════════════════════════════════════════════════
+   퀴즈 시작
+══════════════════════════════════════════════════════ */
+function startQuiz() {
+  quizList  = buildQuizList();
+  curIdx    = 0; score = 0; results = []; answering = false;
+  showScreen('quiz-screen');
+  renderQuestion();
+}
+
+/* ══════════════════════════════════════════════════════
+   문제 렌더링
+══════════════════════════════════════════════════════ */
+function renderQuestion() {
+  const q   = quizList[curIdx];
+  const cat = CATEGORIES[q.category];
+
+  document.getElementById('progress-label').textContent = `${curIdx + 1} / ${TOTAL_Q}`;
+  document.getElementById('progress-bar').style.width   = `${(curIdx / TOTAL_Q) * 100}%`;
+
+  const banner = document.getElementById('category-banner');
+  banner.className = `category-banner ${cat.cls}`;
+  banner.style.animation = 'none'; banner.offsetHeight; banner.style.animation = 'fadeIn 0.4s ease';
+
+  document.getElementById('banner-tag').textContent       = cat.tag;
+  document.getElementById('banner-cat-img').src           = cat.img;
+  document.getElementById('banner-cat-img').alt           = cat.label;
+  document.getElementById('banner-category').textContent  = cat.label;
+  document.getElementById('banner-question').innerHTML    =
+    `다음 중 <strong>${cat.label}</strong>는 무엇일까요?`;
+
+  // 보기 버튼
+  const container = document.getElementById('choices-container');
+  container.innerHTML = '';
+  answering = false;
+
+  q.choices.forEach((item, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.id = `choice-${idx}`;
+    btn.innerHTML = `
+      <span class="choice-num">${idx + 1}</span>
+      <img src="${item.img}" class="choice-img" alt="${item.name}" />
+      <span class="choice-label">${item.name}</span>
+    `;
+    btn.addEventListener('click', () => handleChoice(idx, item));
+    container.appendChild(btn);
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   선택 처리
+══════════════════════════════════════════════════════ */
+function handleChoice(chosenIdx, chosenItem) {
+  if (answering) return;
+  answering = true;
+
+  const q         = quizList[curIdx];
+  const isCorrect = chosenItem.name === q.correct.name;
+
+  document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+
+  const chosenBtn = document.getElementById(`choice-${chosenIdx}`);
+
+  if (isCorrect) {
+    chosenBtn.classList.add('is-correct');
+    score++;
+    showFeedback(true, q.correct);
+    launchConfetti();
+  } else {
+    chosenBtn.classList.add('is-wrong');
+    const correctBtn = findCorrectBtn(q);
+    if (correctBtn) correctBtn.classList.add('is-correct');
+    showFeedback(false, q.correct);
+  }
+
+  results.push({ q, chosenItem, correct: isCorrect });
+
+  setTimeout(() => {
+    hideFeedback();
+    curIdx++;
+    if (curIdx < TOTAL_Q) renderQuestion();
+    else showResult();
+  }, isCorrect ? 1900 : 2400);
+}
+
+function findCorrectBtn(q) {
+  for (const btn of document.querySelectorAll('.choice-btn')) {
+    if (btn.querySelector('.choice-label').textContent === q.correct.name) return btn;
+  }
+  return null;
+}
+
+/* ══════════════════════════════════════════════════════
+   피드백 오버레이
+══════════════════════════════════════════════════════ */
+function showFeedback(correct, correctItem) {
+  const overlay  = document.getElementById('feedback-overlay');
+  const icon     = document.getElementById('feedback-icon');
+  const img      = document.getElementById('feedback-img');
+  const msg      = document.getElementById('feedback-msg');
+  const sub      = document.getElementById('feedback-correct-item');
+
+  overlay.className = `feedback-overlay show ${correct ? 'correct' : 'wrong'}`;
+  img.src  = correctItem.img;
+  img.alt  = correctItem.name;
+
+  if (correct) {
+    icon.textContent = ['🎉','⭐','🌟','🥳','✨'][Math.floor(Math.random()*5)];
+    msg.textContent  = ['정답이에요! 🎊','맞았어요! 👏','훌륭해요! 🌟'][Math.floor(Math.random()*3)];
+    sub.textContent  = correctItem.name;
+  } else {
+    icon.textContent = ['😢','🙈','💪'][Math.floor(Math.random()*3)];
+    msg.textContent  = ['아쉬워요! 다시 해봐요 😊','조금 더 생각해봐요 💪'][Math.floor(Math.random()*2)];
+    sub.textContent  = `정답은 "${correctItem.name}" 이에요!`;
+  }
+}
+
+function hideFeedback() {
+  document.getElementById('feedback-overlay').className = 'feedback-overlay';
+}
+
+/* ══════════════════════════════════════════════════════
+   컨페티
+══════════════════════════════════════════════════════ */
+function launchConfetti() {
+  const colors = ['#ff6b35','#f7931e','#4caf50','#3f51b5','#e91e63','#9c27b0','#00bcd4','#fdd835'];
+  for (let i = 0; i < 48; i++) {
+    const el   = document.createElement('div');
+    el.className = 'confetti-piece';
+    const size = 8 + Math.random() * 11;
+    el.style.cssText = `
+      left: ${Math.random() * 100}vw;
+      width: ${size}px; height: ${size}px;
+      background: ${colors[Math.floor(Math.random()*colors.length)]};
+      border-radius: ${Math.random() > 0.5 ? '50%' : '3px'};
+      animation-duration: ${1.4 + Math.random() * 1.6}s;
+      animation-delay: ${Math.random() * 0.35}s;
+    `;
+    document.body.appendChild(el);
+    el.addEventListener('animationend', () => el.remove());
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   결과 화면
+══════════════════════════════════════════════════════ */
+function showResult() {
+  document.getElementById('progress-bar').style.width = '100%';
+
+  const pct = score / TOTAL_Q;
+  let trophy, title, message, stars;
+
+  if (pct === 1) {
+    trophy = '🏆'; title = '완벽해요!';
+    message = '6문제를 모두 맞혔어요! 정말 대단해요! 👏';
+    stars = '⭐⭐⭐⭐⭐';
+    setTimeout(launchConfetti, 200); setTimeout(launchConfetti, 700);
+  } else if (pct >= 0.8) {
+    trophy = '🥇'; title = '아주 잘했어요!';
+    message = '거의 다 맞혔어요! 조금만 더 연습해요! 💪';
+    stars = '⭐⭐⭐⭐';
+    setTimeout(launchConfetti, 300);
+  } else if (pct >= 0.5) {
+    trophy = '🥈'; title = '잘했어요!';
+    message = '절반 이상 맞혔어요! 다시 도전해봐요! 🌟';
+    stars = '⭐⭐⭐';
+  } else if (pct >= 0.3) {
+    trophy = '🌱'; title = '조금 더 연습해요!';
+    message = '다시 한 번 도전하면 더 잘할 수 있어요! 화이팅! 💪';
+    stars = '⭐⭐';
+  } else {
+    trophy = '🌱'; title = '다시 해봐요!';
+    message = '괜찮아요! 반복하면 금방 잘할 수 있어요! 😊';
+    stars = '⭐';
+  }
+
+  document.getElementById('result-trophy').textContent  = trophy;
+  document.getElementById('result-title').textContent   = title;
+  document.getElementById('score-number').textContent   = score;
+  document.getElementById('score-stars').textContent    = stars;
+  document.getElementById('result-message').textContent = message;
+
+  const catLabel = { paper: '종이 매체', screen: '화면·소리 매체' };
+  document.getElementById('summary-list').innerHTML = results.map(r => `
+    <div class="summary-row">
+      <img src="${r.q.correct.img}" class="s-img" alt="${r.q.correct.name}" />
+      <span class="s-name">${r.q.correct.name}</span>
+      <span class="s-cat">${catLabel[r.q.category]}</span>
+      <span class="s-badge ${r.correct ? 'badge-ok' : 'badge-err'}">
+        ${r.correct ? '✅ 정답' : '❌ 오답'}
+      </span>
+    </div>
+  `).join('');
+
+  showScreen('result-screen');
+}
+
+/* ══════════════════════════════════════════════════════
+   다시 시작
+══════════════════════════════════════════════════════ */
+function restartQuiz() {
+  showScreen('start-screen');
+}
+</script>
+</body>
+</html>
